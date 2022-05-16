@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+   postgres:
+    container_name: postgres_latest
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./server/postgresdata:/var/lib/postgresql/data
+      - ./server/src/migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crawl_data
+  backend:
+    build:
+      context: ./server
+      dockerfile: ./Dockerfile.dev
+    container_name: nodejs_typescript
+    image: "crawl_data_server"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/crawl_data
+    ports:
+      - "5000:5000"
+ 
